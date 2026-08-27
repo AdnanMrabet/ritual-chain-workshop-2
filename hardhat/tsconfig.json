@@ -7,5 +7,6 @@
     "outDir": "dist",
     "types": ["node"],
     "verbatimModuleSyntax": true
+    ,"allowImportingTsExtensions": true
   }
 }

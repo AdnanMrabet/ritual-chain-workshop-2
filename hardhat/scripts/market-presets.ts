@@ -7,7 +7,7 @@ export const COMPARATOR = {
 } as const;
 
 /** MarketState enum, matching RitualPredict.MarketState. */
-export const MARKET_STATE = ["Open", "Closed", "Resolving", "Resolved", "Invalid"] as const;
+export const MARKET_STATE = ["Commit", "Reveal", "Resolving", "Resolved", "Invalid"] as const;
 
 /** Outcome enum, matching RitualPredict.Outcome. */
 export const OUTCOME = ["Unresolved", "YES", "NO"] as const;
@@ -17,11 +17,12 @@ export const OUTCOME = ["Unresolved", "YES", "NO"] as const;
  * Mirrors DEMO_MARKET in web/src/lib/presets.ts.
  */
 export const DEMO_MARKET = {
-  question: "Will ETH/USD be at least $4,000 when this market resolves?",
-  oracleUrl: "http://localhost:3000/api/oracle/eth",
-  jsonPath: ".price",
-  target: 4000,
+  question: "Will weekday metro arrivals exceed 60 before 09:00?",
+  oracleUrl: "https://data.example.test/transit",
+  jsonPath: ".arrivals",
+  target: 60,
   comparator: "gte",
-  bettingSeconds: 180,
+  commitSeconds: 120,
+  revealSeconds: 90,
   resolveDelaySeconds: 60,
 } as const;

@@ -54,7 +54,8 @@ for (const market of await predict.read.getMarkets()) {
   console.log(
     `  pool         ${formatEther(pool)} RITUAL — YES ${yesPct.toFixed(1)}% / NO ${(100 - yesPct).toFixed(1)}%`,
   );
-  console.log(`  closes       block ${market.closeBlock} (${secondsUntil(market.closeBlock)})`);
+  console.log(`  commit end   block ${market.commitEndBlock} (${secondsUntil(market.commitEndBlock)})`);
+  console.log(`  reveal end   block ${market.revealEndBlock} (${secondsUntil(market.revealEndBlock)})`);
   console.log(`  resolves     block ${market.resolveBlock} (${secondsUntil(market.resolveBlock)})`);
   console.log(`  attempts     ${market.attempts}/${maxAttempts}`);
 

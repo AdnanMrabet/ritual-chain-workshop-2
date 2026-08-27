@@ -37,7 +37,8 @@ const params = {
   jsonPath: process.env.JSON_PATH ?? DEMO_MARKET.jsonPath,
   target: BigInt(process.env.TARGET ?? DEMO_MARKET.target),
   comparator,
-  bettingSeconds: BigInt(process.env.BETTING_SECONDS ?? DEMO_MARKET.bettingSeconds),
+  commitSeconds: BigInt(process.env.COMMIT_SECONDS ?? DEMO_MARKET.commitSeconds),
+  revealSeconds: BigInt(process.env.REVEAL_SECONDS ?? DEMO_MARKET.revealSeconds),
   resolveDelaySeconds: BigInt(process.env.RESOLVE_DELAY_SECONDS ?? DEMO_MARKET.resolveDelaySeconds),
 } as const;
 
@@ -55,7 +56,7 @@ if (executionBalance === 0n) {
 console.log(`Question:   ${params.question}`);
 console.log(`Rule:       observed ${comparatorKey.toUpperCase()} ${params.target}`);
 console.log(`Oracle:     ${params.oracleUrl}  (jq: ${params.jsonPath})`);
-console.log(`Betting:    ${params.bettingSeconds}s, then resolve after ${params.resolveDelaySeconds}s`);
+console.log(`Phases:     commit ${params.commitSeconds}s, reveal ${params.revealSeconds}s, resolve +${params.resolveDelaySeconds}s`);
 console.log("");
 
 const hash = await predict.write.createMarket([params]);
@@ -65,7 +66,8 @@ const marketId = await predict.read.marketCount();
 const market = await predict.read.getMarket([marketId]);
 
 console.log(`Created market #${marketId} in block ${receipt.blockNumber}`);
-console.log(`Betting closes at block ${market.closeBlock}`);
+console.log(`Commit closes at block ${market.commitEndBlock}`);
+console.log(`Reveal closes at block ${market.revealEndBlock}`);
 console.log(`Scheduler fires at block ${market.resolveBlock} (schedule id ${market.scheduleId})`);
 console.log(`${explorerTx(hash)}`);
 
