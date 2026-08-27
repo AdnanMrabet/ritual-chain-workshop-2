@@ -28,9 +28,9 @@ FORM: Transit dispatch ledger, highest-resonance direction; operate mode; manual
         <p class="lede">CipherBook locks your stake and a commitment hash first. Your YES or NO stays private until the reveal window, then Ritual’s Scheduler and HTTP precompile settle the market without a keeper.</p>
       </div>
       <div class="phase-board" aria-label="Market lifecycle">
-        <div class="phase active"><b>COMMIT</b><span>Seal side + salt</span><em>OPEN</em></div>
-        <div class="phase"><b>REVEAL</b><span>Open your envelope</span><em>NEXT</em></div>
-        <div class="phase"><b>RESOLVE</b><span>Scheduled oracle read</span><em>AUTO</em></div>
+        <div class="phase active"><b>COMMIT</b><span>Ends at block 8,431,260</span><em>OPEN</em></div>
+        <div class="phase"><b>REVEAL</b><span>Ends at block 8,431,350</span><em>NEXT</em></div>
+        <div class="phase"><b>RESOLVE</b><span>Starts at block 8,431,410</span><em>AUTO</em></div>
       </div>
     </section>
 
@@ -50,7 +50,7 @@ FORM: Transit dispatch ledger, highest-resonance direction; operate mode; manual
           <label class="field">2 / STAKE AMOUNT <span><input id="stake" type="number" min="0.01" step="0.01" value="0.25" required> RITUAL</span></label>
           <label class="field">3 / PRIVATE SALT <span><input id="salt" type="text" minlength="6" value="platform-quiet-47" autocomplete="off" required></span></label>
           <button class="seal-button" type="submit"><span>CREATE PRACTICE SEAL</span><b aria-hidden="true">→</b></button>
-          <p class="fineprint">Local demonstration only. No wallet request or transaction is sent.</p>
+          <p class="fineprint">Local demonstration only. The checksum is SHA-256 for UI feedback—not the contract’s ABI-packed keccak256 commitment. No wallet request or transaction is sent.</p>
         </form>
 
         <aside class="receipt" aria-live="polite" aria-labelledby="receipt-title">
@@ -58,7 +58,7 @@ FORM: Transit dispatch ledger, highest-resonance direction; operate mode; manual
           <dl>
             <div><dt>POSITION</dt><dd id="receipt-side">HIDDEN</dd></div>
             <div><dt>STAKE</dt><dd id="receipt-stake">—</dd></div>
-            <div class="hash-row"><dt>LOCAL RECEIPT</dt><dd id="receipt-hash">Submit the docket to create a practice receipt.</dd></div>
+            <div class="hash-row"><dt>NON-CONTRACT UI CHECKSUM</dt><dd id="receipt-hash">Submit the docket to create a practice checksum.</dd></div>
           </dl>
           <div class="warning"><b>Keep the side and salt.</b> The contract cannot recover them. A position not revealed on time can only reclaim its original stake.</div>
         </aside>
