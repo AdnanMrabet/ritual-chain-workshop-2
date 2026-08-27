@@ -1,0 +1,92 @@
+<!--
+THESIS: A sealed-position docket makes commit–reveal tangible and rejects the generic token dashboard.
+OWN-WORLD: Cobalt dispatch fields, black rules, ticket-white paper, signal-yellow actions, condensed headings.
+STORY: Understand the three phases, create a local practice seal, then inspect the automatic resolution path.
+FIRST VIEWPORT: Identity and phase board above a two-column docket; the commit control is the dominant action.
+FORM: Transit dispatch ledger, highest-resonance direction; operate mode; manually assigned for the workshop brief.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CipherBook — a commit–reveal self-resolving prediction market for Ritual Chain.">
+  <title>CipherBook / Sealed prediction markets</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="#top" aria-label="CipherBook home"><span aria-hidden="true">▰</span> CIPHERBOOK</a>
+    <div class="network"><i></i> LOCAL PROOF MODE <span>RITUAL / 1979</span></div>
+  </header>
+
+  <main id="top">
+    <section class="opening" aria-labelledby="title">
+      <div class="intro">
+        <p class="kicker">SELF-RESOLVING / COMMIT–REVEAL</p>
+        <h1 id="title">Take a side.<br><span>Keep it sealed.</span></h1>
+        <p class="lede">CipherBook locks your stake and a commitment hash first. Your YES or NO stays private until the reveal window, then Ritual’s Scheduler and HTTP precompile settle the market without a keeper.</p>
+      </div>
+      <div class="phase-board" aria-label="Market lifecycle">
+        <div class="phase active"><b>COMMIT</b><span>Seal side + salt</span><em>OPEN</em></div>
+        <div class="phase"><b>REVEAL</b><span>Open your envelope</span><em>NEXT</em></div>
+        <div class="phase"><b>RESOLVE</b><span>Scheduled oracle read</span><em>AUTO</em></div>
+      </div>
+    </section>
+
+    <section class="docket" aria-labelledby="market-title">
+      <div class="docket-head">
+        <div><span>ILLUSTRATIVE MARKET / CB-0041</span><h2 id="market-title">Will weekday metro arrivals exceed 60 before 09:00?</h2></div>
+        <div class="deadline"><span>COMMIT CLOSES</span><strong>BLOCK 8,431,260</strong></div>
+      </div>
+
+      <div class="workbench">
+        <form id="seal-form" class="seal-form">
+          <fieldset>
+            <legend>1 / CHOOSE A SIDE</legend>
+            <label class="side"><input type="radio" name="side" value="YES" checked><span>YES <small>Observed ≥ 60</small></span></label>
+            <label class="side"><input type="radio" name="side" value="NO"><span>NO <small>Observed &lt; 60</small></span></label>
+          </fieldset>
+          <label class="field">2 / STAKE AMOUNT <span><input id="stake" type="number" min="0.01" step="0.01" value="0.25" required> RITUAL</span></label>
+          <label class="field">3 / PRIVATE SALT <span><input id="salt" type="text" minlength="6" value="platform-quiet-47" autocomplete="off" required></span></label>
+          <button class="seal-button" type="submit"><span>CREATE PRACTICE SEAL</span><b aria-hidden="true">→</b></button>
+          <p class="fineprint">Local demonstration only. No wallet request or transaction is sent.</p>
+        </form>
+
+        <aside class="receipt" aria-live="polite" aria-labelledby="receipt-title">
+          <div class="receipt-status"><i></i><span id="receipt-title">WAITING FOR SEAL</span></div>
+          <dl>
+            <div><dt>POSITION</dt><dd id="receipt-side">HIDDEN</dd></div>
+            <div><dt>STAKE</dt><dd id="receipt-stake">—</dd></div>
+            <div class="hash-row"><dt>LOCAL RECEIPT</dt><dd id="receipt-hash">Submit the docket to create a practice receipt.</dd></div>
+          </dl>
+          <div class="warning"><b>Keep the side and salt.</b> The contract cannot recover them. A position not revealed on time can only reclaim its original stake.</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="mechanism" aria-labelledby="mechanism-title">
+      <div class="mechanism-copy"><p class="kicker">WHAT THE CONTRACT ADDS</p><h2 id="mechanism-title">Crowd direction stays unreadable until entry is over.</h2></div>
+      <ol>
+        <li><b>SEALED</b><p>The chain stores a hash, amount and account—not the chosen side.</p></li>
+        <li><b>VERIFIED</b><p>Reveal recomputes <code>market + bettor + side + salt</code> and rejects any mismatch.</p></li>
+        <li><b>RECOVERABLE</b><p>Unrevealed stakes remain reclaimable after the window. Invalid markets refund revealed stakes.</p></li>
+      </ol>
+    </section>
+
+    <section class="resolution" aria-labelledby="resolution-title">
+      <div><p class="kicker">AUTOMATIC RESOLUTION PATH</p><h2 id="resolution-title">One booked wake-up.<br>Three bounded attempts.</h2></div>
+      <div class="route" role="img" aria-label="Scheduler calls HTTP, jq extracts a value, and the pool settles or refunds">
+        <span>RITUAL SCHEDULER<small>scheduled block</small></span><b>→</b>
+        <span>HTTP 0x0801<small>oracle response</small></span><b>→</b>
+        <span>JQ 0x0803<small>uint extraction</small></span><b>→</b>
+        <span>POOL<small>payout / refund</small></span>
+      </div>
+      <p class="proof-note">If HTTP or jq fails, CipherBook retries. Failure is never interpreted as NO; after the final attempt, the market becomes refundable.</p>
+    </section>
+  </main>
+
+  <footer><span>CIPHERBOOK / RITUAL CHAIN WORKSHOP 2</span><span>LOCAL BUILD — NOT DEPLOYED</span></footer>
+  <script src="app.js"></script>
+</body>
+</html>
