@@ -1,108 +1,74 @@
-# Ritual Predict
+# CipherBook
 
-A self-resolving binary prediction market on [Ritual Chain](https://docs.ritualfoundation.org).
+CipherBook is a self-resolving, commit–reveal prediction market built from the official Ritual Chain Workshop 2 repository. A bettor first submits a stake plus a hash; YES/NO and the private salt remain hidden until the reveal window. Ritual Scheduler later wakes the contract, HTTP `0x0801` reads the oracle, and jq `0x0803` extracts the observed value.
 
-Create a market like _"Will ETH/USD be at least $4,000 when this market resolves?"_, stake native
-RITUAL on YES or NO, and watch it settle itself. When the betting window closes, **nobody presses a
-resolve button and no backend cron job runs**. The Ritual Scheduler wakes the contract at a block
-fixed when the market was created; the contract calls the HTTP precompile to read the configured
-oracle URL, extracts one number with the jq precompile, compares it to the target, and settles.
-Winners then pull their proportional share of the pool.
+This is a real GitHub fork with original contract, test, interface, and documentation commits—not a ZIP re-upload.
 
----
+## What changed
 
-## Architecture
+- Replaced open bets with sealed `commitPosition` and verified `revealPosition` phases.
+- Added permissionless recovery for positions that were never revealed.
+- Invalidates one-sided revealed pools rather than awarding a guaranteed side.
+- Retries oracle resolution three times; an oracle failure is never interpreted as NO.
+- Keeps payouts and refunds pull-based, with permissionless expiry for abandoned markets.
+- Added an original CipherBook interface that explains and demonstrates the flow locally.
+- Added eight Solidity tests with mocked Ritual system contracts and precompiles.
 
+## Lifecycle
+
+```text
+Commit hash + stake → Reveal side + salt → Ritual Scheduler
+                    → HTTP 0x0801 → jq 0x0803 → payout or refund
 ```
-                 createMarket()                    ┌──────────────────────────┐
-   user  ─────────────────────────────────────────▶│  RitualPredict.sol       │
-   user  ─────────── bet(id, YES|NO) ─────────────▶│                          │
-                                                   │  markets, pools, stakes  │
-                                     schedule() ◀──┤                          │
-                                                   └──────────────────────────┘
-    ┌─────────────────────────────┐                     ▲              │
-    │ Scheduler  0x56e7…D58B      │  onScheduledResolve │              │ deposit()
-    │ system contract             │─────────────────────┘              ▼
-    │ fires at resolveBlock,      │                        ┌────────────────────────┐
-    │ 3 attempts, 200 blocks apart│                        │ RitualWallet 0x532F…   │
-    └─────────────────────────────┘                        │ prepaid execution fees │
-                                                           └────────────────────────┘
-                        inside that one scheduled transaction:
+The commitment is:
 
-   TEEServiceRegistry 0x9644…  ──pickServiceByCapability(HTTP_CALL)──▶  executor address
-   HTTP precompile    0x0801   ──GET oracleUrl (in a TEE)───────────▶  demo oracle
-   jq  precompile     0x0803   ──jsonPath, outputType=uint256───────▶  observed value
-                                          │
-                                          ▼
-                        observed ⋈ target  →  Resolved(YES|NO)
-                        read failed 3×     →  Invalid (everyone refunds)
+```solidity
+keccak256(abi.encodePacked(marketId, bettor, isYes, salt))
 ```
 
----
+Keep the salt private until reveal. If it is lost, the side cannot be revealed, but the original sealed stake can be reclaimed after the reveal window.
 
-### Design decisions worth knowing
+## Local proof
 
-**Deadlines are block numbers, not timestamps.** The Scheduler fires at a _block_, so betting also
-closes at a _block_. That way "betting is closed" and "the Scheduler woke us" can never disagree,
-whatever the chain's block time does. `createMarket` takes human durations in seconds and converts
-them using the `blockTimeMs` fixed at deployment. Nothing on-chain reads `block.timestamp`.
-
-**On Ritual Chain, `block.timestamp` is Unix milliseconds** (≈`1.786e12`), not seconds — verified
-against the live chain, not assumed. That is a good reason to avoid it entirely, which this contract
-does. Measured block time was ≈195 ms when this was written; run
-`npx hardhat run scripts/block-time.ts` to check it for yourself.
-
-**A failed oracle read is never a NO.** `onScheduledResolve` treats a precompile failure, a non-200
-response, an undecodable envelope, an executor error message, and an unparseable body all as
-_failures_, not as a negative outcome. The response decode happens through an external `try`, so
-malformed bytes surface as a caught failure instead of reverting the execution and rolling back the
-attempt counter.
-
-**Retries are the Scheduler's own mechanism.** `createMarket` books `numCalls = 3` executions
-`frequency = 200` blocks apart in a single `schedule()` call. Attempt 1 lands at `resolveBlock`; if
-it succeeds, the contract `cancel()`s the remainder; if all three fail, the market becomes `Invalid`
-and every stake is refundable. Each attempt re-rolls the TEE executor seed, so one unhealthy
-executor cannot sink a market. The callback is idempotent, so a leftover execution is harmless.
-
-**No executor is hardcoded.** The contract calls
-`TEEServiceRegistry.pickServiceByCapability(HTTP_CALL, true, seed, 8)` at resolution time.
-
-**Payouts are pull-based and loop-free.** `claimWinnings` computes
-`stake × totalPool ÷ winningPool` for the caller only. Integer division leaves sub-wei dust in the
-contract; that is deliberate and negligible.
-
-**Empty winning side → refundable.** Pari-mutuel has no denominator when nobody backed the winning
-answer, so the market records the outcome and observed value, then becomes `Invalid` so everyone
-takes their stake back.
-
-**Resolution parameters are immutable.** `target`, `comparator`, `oracleUrl`, `jsonPath`, and
-`resolveBlock` have no setter. The `ResolutionRuleSet` event records them at creation.
-
----
-
-## Prerequisites
-
-- Node.js 20+ and `pnpm`
-- A wallet with testnet RITUAL from <https://faucet.ritualfoundation.org>
-
-## Setup
+Requirements: Node.js, Corepack, and pnpm.
 
 ```bash
 cd hardhat
-pnpm install
-cp .env.example .env
+corepack pnpm install
+corepack pnpm exec hardhat build
+corepack pnpm exec tsc --noEmit
+corepack pnpm exec hardhat test solidity
 ```
 
----
+Expected result: `8 passing`.
 
-## Scope
+Build the static walkthrough:
 
-Intentionally not included: an AMM, an order book, an order-matching engine, governance, a separate
-ERC-20, a centralized resolver, or an upgrade proxy. Staking uses the chain's native asset and the
-betting model is plain pari-mutuel: two running totals and one mapping per side.
+```bash
+cd web
+npm run build
+```
 
-## Reference
+The output is written to `web/dist`. It is a local proof artifact only; this repository does not use GitHub Pages and does not claim a live deployment.
 
-- Ritual Chain docs — <https://docs.ritualfoundation.org>
-- dApp skills — <https://github.com/ritual-foundation/ritual-dapp-skills>
-- Explorer — <https://explorer.ritualfoundation.org> · Faucet — <https://faucet.ritualfoundation.org>
+## Ritual integration
+
+The contract uses the canonical addresses centralized in `hardhat/contracts/ritual/RitualChain.sol`: Scheduler, RitualWallet, TEE Service Registry, HTTP `0x0801`, and jq `0x0803`.
+
+The callback is bounded to three attempts. HTTP errors, malformed responses, non-2xx statuses, jq failures, missing executors, and one-sided pools lead to retries or a refundable invalid state.
+
+## Deployment status
+
+No wallet private key was provided for account 4, so no Ritual Chain deployment was attempted. Contract address and transaction hash should be left blank in the Proof of Building form.
+
+## Project map
+
+```text
+hardhat/contracts/RitualPredict.sol   Commit–reveal market
+hardhat/contracts/CipherBook.t.sol    Eight local contract tests
+hardhat/scripts/                      Deployment and status utilities
+web/                                  Original local interface
+PRODUCT.md                            Product truth and constraints
+DESIGN.md                             Visual system
+LOCAL_PROOF.md                        Reproducible evidence
+```
